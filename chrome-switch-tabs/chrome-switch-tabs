@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-TABS_JSON=$(chrome-remote-interface list | sed -e "s/^'//" -e "s/'$//" | jq -r 'map(select(.type == "page") | {id: .id, title: .title})')
+TABS_JSON=$(chrome-remote-interface list | sed -e "s/^'//" -e "s/'$//" | jq -r 'map(select(.type == "page") | {id: .id, title: .title, url: .url})')
 
 if [[ -z $@ ]]; then
-    TAB_NAMES=$(echo "$TABS_JSON" | jq -r 'map(.title) | .[]')
+    TAB_NAMES=$(echo "$TABS_JSON" | jq -r 'map(.title[:40] + " (" + .url + ")") | .[]')
 
     echo "$TAB_NAMES"
 else
