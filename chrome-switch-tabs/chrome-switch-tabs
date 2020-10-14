@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
 TABS_JSON=$(chrome-remote-interface list | sed -e "s/^'//" -e "s/'$//" | jq -r 'map(select(.type == "page") | {id: .id, title: .title, url: .url})')
-
 if [[ -z $@ ]]; then
-    TAB_NAMES=$(echo "$TABS_JSON" | jq -r 'map(.title[:40] + " (" + .url + ")") | .[]')
-
+    TAB_NAMES=$(echo $TABS_JSON | jq -r '.[] | (.title[:60] | . + " " * (60 - length) + " (") + .url + ")"')
     echo "$TAB_NAMES"
 else
     TAB=$*
-
+    TAB=$(echo ${TAB:0:60} | sed -e 's/[[:space:]]*$//')
     TAB_ID=$(echo "$TABS_JSON" | jq -r "map(select(.title | contains (\"${TAB//\"/\\\"}\")) | .id) | .[]")
 
     chrome-remote-interface activate "$TAB_ID" >/dev/null
